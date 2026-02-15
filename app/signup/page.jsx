@@ -50,6 +50,16 @@ const SignUp = () => {
               }
               required
             />
+             <input
+              className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
+              type="password"
+              placeholder="Whatsapp Number"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                setFormData({ ...formData, confirmPassword: e.target.value })
+              }
+              required
+            />
             <input
               className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
               type="email"
@@ -60,6 +70,7 @@ const SignUp = () => {
               }
               required
             />
+            
             <input
               className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
               type="password"
@@ -80,6 +91,7 @@ const SignUp = () => {
               }
               required
             />
+           
             <button
               type="submit"
               className="w-full bg-orange-600 text-white py-3 hover:bg-orange-700 transition uppercase font-medium"
