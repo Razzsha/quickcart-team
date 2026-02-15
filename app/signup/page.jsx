@@ -7,10 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/assets/assets";
 
-const SignIn = () => {
+const SignUp = () => {
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const handleSubmit = (e) => {
@@ -31,13 +33,23 @@ const SignIn = () => {
             />
           </div>
           <p className="text-2xl md:text-3xl text-gray-500 text-center mb-2">
-            Welcome <span className="font-medium text-orange-600">back</span>
+            Create <span className="font-medium text-orange-600">account</span>
           </p>
           <p className="text-sm text-gray-500/80 text-center mb-8">
-            Sign in to your account to continue
+            Sign up to get started with QuickCart
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
+              type="text"
+              placeholder="Full name"
+              value={formData.fullName}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
+              required
+            />
             <input
               className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
               type="email"
@@ -58,29 +70,31 @@ const SignIn = () => {
               }
               required
             />
-            <div className="flex justify-end">
-              <Link
-                href="#"
-                className="text-xs text-orange-600 hover:text-orange-700 transition"
-              >
-                Forgot password?
-              </Link>
-            </div>
+            <input
+              className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
+              type="password"
+              placeholder="Confirm password"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                setFormData({ ...formData, confirmPassword: e.target.value })
+              }
+              required
+            />
             <button
               type="submit"
               className="w-full bg-orange-600 text-white py-3 hover:bg-orange-700 transition uppercase font-medium"
             >
-              Sign in
+              Sign up
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/signup"
+              href="/signin"
               className="text-orange-600 font-medium hover:text-orange-700 transition"
             >
-              Sign up
+              Sign in
             </Link>
           </p>
         </div>
@@ -90,4 +104,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
