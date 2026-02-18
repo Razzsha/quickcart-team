@@ -1,0 +1,6 @@
+2026/02/18-00:53:28.814 4d48 Reusing MANIFEST C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\Local Storage\leveldb/MANIFEST-000001
+2026/02/18-00:53:28.820 4d48 Recovering log #6
+2026/02/18-00:53:28.822 4d48 Reusing old log C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\Local Storage\leveldb/000006.log 
+2026/02/18-00:54:28.831 678 Level-0 table #10: started
+2026/02/18-00:54:28.837 678 Level-0 table #10: 16473 bytes OK
+2026/02/18-00:54:28.840 678 Delete type=0 #6

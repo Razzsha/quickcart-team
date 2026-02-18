@@ -1,16 +1,32 @@
 import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount } = useAppContext()
+  const { currency, router, getCartCount, getCartAmount, userData, cartItems, products, setCartItems } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [userAddresses, setUserAddresses] = useState([]);
 
   const fetchUserAddresses = async () => {
+    // Try to get addresses from localStorage first
+    try {
+      const savedAddresses = JSON.parse(localStorage.getItem('userAddresses') || '[]');
+      if (savedAddresses.length > 0 && userData?._id) {
+        // Filter addresses for current user
+        const userAddresses = savedAddresses.filter(addr => addr.userId === userData._id);
+        if (userAddresses.length > 0) {
+          setUserAddresses(userAddresses);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+    }
+    // Fallback to dummy data
     setUserAddresses(addressDummyData);
   }
 
@@ -20,12 +36,91 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
+    if (!selectedAddress) {
+      toast.error('Please select a delivery address');
+      return;
+    }
 
+    if (!userData || !userData._id) {
+      toast.error('Please sign in to place an order');
+      router.push('/signin?return=/cart');
+      return;
+    }
+
+    // Prepare order items from cart
+    const items = Object.keys(cartItems).map(itemId => {
+      const product = products.find(p => p._id === itemId);
+      if (!product || cartItems[itemId] <= 0) return null;
+      
+      return {
+        product: {
+          _id: product._id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          offerPrice: product.offerPrice,
+          image: product.image,
+          category: product.category
+        },
+        quantity: cartItems[itemId]
+      };
+    }).filter(item => item !== null);
+
+    if (items.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
+    const subtotal = getCartAmount();
+    const tax = Math.floor(subtotal * 0.02);
+    const totalAmount = subtotal + tax;
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userData._id,
+          items: items,
+          amount: totalAmount,
+          address: {
+            fullName: selectedAddress.fullName,
+            phoneNumber: selectedAddress.phoneNumber,
+            pincode: selectedAddress.pincode,
+            area: selectedAddress.area,
+            city: selectedAddress.city,
+            state: selectedAddress.state
+          }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Order placed successfully!');
+        // Clear cart
+        setCartItems({});
+        localStorage.removeItem('cart');
+        // Redirect to order placed page
+        router.push('/order-placed');
+      } else {
+        toast.error(data.error || 'Failed to place order');
+      }
+    } catch (error) {
+      console.error('Order creation error:', error);
+      toast.error('Failed to connect to server. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     fetchUserAddresses();
-  }, [])
+  }, [userData])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">
@@ -115,8 +210,12 @@ const OrderSummary = () => {
         </div>
       </div>
 
-      <button onClick={createOrder} className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700">
-        Place Order
+      <button 
+        onClick={createOrder} 
+        disabled={loading || !selectedAddress || getCartCount() === 0}
+        className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? 'Placing Order...' : 'Place Order'}
       </button>
     </div>
   );

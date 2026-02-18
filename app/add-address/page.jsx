@@ -4,8 +4,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { useState } from "react";
+import { useAppContext } from "@/context/AppContext";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const AddAddress = () => {
+    const router = useRouter();
+    const { userData, isAuthenticated } = useAppContext();
+    const [loading, setLoading] = useState(false);
 
     const [address, setAddress] = useState({
         fullName: '',
@@ -19,6 +25,40 @@ const AddAddress = () => {
     const onSubmitHandler = async (e) => {
         e.preventDefault();
 
+        if (!isAuthenticated || !userData) {
+            toast.error('Please sign in to add address');
+            router.push('/signin?return=/add-address');
+            return;
+        }
+
+        // Validate required fields
+        if (!address.fullName || !address.phoneNumber || !address.area || !address.city || !address.state) {
+            toast.error('Please fill all required fields');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // For now, save to localStorage (you can create an Address API later)
+            const savedAddresses = JSON.parse(localStorage.getItem('userAddresses') || '[]');
+            const newAddress = {
+                _id: Date.now().toString(),
+                userId: userData._id,
+                ...address,
+                createdAt: new Date().toISOString()
+            };
+            savedAddresses.push(newAddress);
+            localStorage.setItem('userAddresses', JSON.stringify(savedAddresses));
+
+            toast.success('Address saved successfully!');
+            router.push('/cart');
+        } catch (error) {
+            console.error('Error saving address:', error);
+            toast.error('Failed to save address');
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -76,8 +116,12 @@ const AddAddress = () => {
                             />
                         </div>
                     </div>
-                    <button type="submit" className="max-w-sm w-full mt-6 bg-orange-600 text-white py-3 hover:bg-orange-700 uppercase">
-                        Save address
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="max-w-sm w-full mt-6 bg-orange-600 text-white py-3 hover:bg-orange-700 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? 'Saving...' : 'Save address'}
                     </button>
                 </form>
                 <Image

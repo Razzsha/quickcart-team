@@ -6,16 +6,32 @@ import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/assets/assets";
+import { useAppContext } from "@/context/AppContext";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
+  const { login } = useAppContext();
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // UI only - no backend logic
+    setLoading(true);
+
+    const result = await login(formData.email, formData.password);
+    
+    if (result.success) {
+      // Redirect to home page or previous page
+      const returnUrl = new URLSearchParams(window.location.search).get('return');
+      router.push(returnUrl || '/');
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -47,6 +63,7 @@ const SignIn = () => {
                 setFormData({ ...formData, email: e.target.value })
               }
               required
+              disabled={loading}
             />
             <input
               className="px-3 py-3 focus:border-orange-500 transition border border-gray-500/30 rounded outline-none w-full text-gray-500"
@@ -57,6 +74,7 @@ const SignIn = () => {
                 setFormData({ ...formData, password: e.target.value })
               }
               required
+              disabled={loading}
             />
             <div className="flex justify-end">
               <Link
@@ -68,9 +86,10 @@ const SignIn = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-orange-600 text-white py-3 hover:bg-orange-700 transition uppercase font-medium"
+              disabled={loading}
+              className="w-full bg-orange-600 text-white py-3 hover:bg-orange-700 transition uppercase font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
 
