@@ -123,7 +123,39 @@ exports.verifyOTP = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
-                isVerified: user.isVerified
+                isVerified: user.isVerified,
+                role: user.role || 'user'
+            }
+        });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+// Admin Login - requires admin role
+exports.adminLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        if (user.password !== password) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        if (user.role !== 'admin' && user.role !== 'seller') {
+            return res.status(403).json({ error: 'Admin access only' });
+        }
+        res.status(200).json({
+            message: 'Admin login successful',
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
             }
         });
     } catch (err) {
@@ -164,7 +196,8 @@ exports.signin = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
-                isVerified: user.isVerified
+                isVerified: user.isVerified,
+                role: user.role || 'user'
             }
         });
     } catch (err) {

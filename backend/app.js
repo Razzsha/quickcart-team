@@ -21,6 +21,7 @@ app.use(express.json());
 // Import routes
 const userRoutes = require('./routes/user');
 const orderRoutes = require('./routes/order');
+const contactRoutes = require('./routes/contact');
 
 // Initialize WhatsApp (import to trigger initialization)
 require('./web');
@@ -28,12 +29,35 @@ require('./web');
 // Define MONGO_URI from .env
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/quickcart';
 
+// Admin credentials (create default admin if not exists)
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'qcart304@gmail.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Quickcart@143';
+
+const ensureAdminUser = async () => {
+    const User = require('./models/User');
+    const existing = await User.findOne({ email: ADMIN_EMAIL });
+    if (!existing) {
+        await User.create({
+            name: 'QuickCart Admin',
+            email: ADMIN_EMAIL,
+            password: ADMIN_PASSWORD,
+            phoneNumber: '9779829409955',
+            isVerified: true,
+            role: 'admin'
+        });
+        console.log('✅ Admin user created (qcart304@gmail.com)');
+    }
+};
+
 // Connect to MongoDB with better error handling
 mongoose.connect(MONGO_URI, {
     serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
     socketTimeoutMS: 45000,
 })
-    .then(() => console.log('✅ MongoDB Connected'))
+    .then(() => {
+        console.log('✅ MongoDB Connected');
+        return ensureAdminUser();
+    })
     .catch(err => {
         console.error('❌ MongoDB Connection Error:', err.message);
         console.error('💡 Make sure MongoDB is running on:', MONGO_URI);
@@ -44,6 +68,7 @@ mongoose.connect(MONGO_URI, {
 // Use routes
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
