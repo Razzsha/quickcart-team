@@ -4,18 +4,49 @@ import { assets } from "@/assets/assets";
 import OrderSummary from "@/components/OrderSummary";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import Link from "next/link";
 
 const Cart = () => {
 
-  const { products, router, cartItems, addToCart, updateCartQuantity, getCartCount, isAuthenticated } = useAppContext();
+  const {
+    products,
+    router,
+    cartItems,
+    addToCart,
+    updateCartQuantity,
+    getCartCount,
+    isAuthenticated,
+    authLoading   // ✅ added
+  } = useAppContext();
 
+
+  // ✅ wait until auth loads
   useEffect(() => {
+
+    if (authLoading) return;
+
     if (!isAuthenticated) {
+
       router.push('/signin?return=/cart');
+
     }
-  }, [isAuthenticated, router]);
+
+  }, [authLoading, isAuthenticated, router]);
+
+
+  // ✅ loading state
+  if (authLoading) {
+
+    return (
+      <>
+        <Navbar />
+        <Loading />
+      </>
+    );
+
+  }
 
   if (!isAuthenticated) {
     return (

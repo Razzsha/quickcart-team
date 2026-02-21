@@ -1,0 +1,12 @@
+2026/02/21-23:28:47.446 11c0 Reusing MANIFEST C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/02/21-23:28:47.446 11c0 Recovering log #9
+2026/02/21-23:28:47.460 11c0 Reusing old log C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000009.log 
+2026/02/21-23:28:52.351 11c0 Level-0 table #14: started
+2026/02/21-23:28:52.389 11c0 Level-0 table #14: 1018748 bytes OK
+2026/02/21-23:28:52.392 11c0 Delete type=0 #9
+2026/02/21-23:28:52.395 11c0 Compacting 1@1 + 1@2 files
+2026/02/21-23:28:52.484 11c0 Generated table #15@1: 32275 keys, 1343368 bytes
+2026/02/21-23:28:52.485 11c0 Compacted 1@1 + 1@2 files => 1343368 bytes
+2026/02/21-23:28:52.486 11c0 compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/02/21-23:28:52.487 11c0 Delete type=2 #11
+2026/02/21-23:28:52.487 11c0 Delete type=2 #14
