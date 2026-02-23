@@ -37,6 +37,12 @@ This repo is **frontend only** – contributors can improve the design, add new 
     npm run dev
     ```
 
+4. **Backend & Cloudinary** (for product management & image uploads):
+   - Start MongoDB
+   - Copy `backend/.env.example` to `backend/.env`
+   - Add your [Cloudinary](https://console.cloudinary.com) credentials: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+   - Run backend: `cd backend && node app.js`
+
 ---
 
 ## Contributing

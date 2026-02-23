@@ -1,3 +1,2 @@
-2026/02/21-23:28:46.829 4320 Reusing MANIFEST C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\Service Worker\Database/MANIFEST-000001
-2026/02/21-23:28:46.830 4320 Recovering log #3
-2026/02/21-23:28:46.831 4320 Reusing old log C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\Service Worker\Database/000003.log 
+2026/02/23-20:58:00.571 bcc Creating DB C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\Service Worker\Database since it was missing.
+2026/02/23-20:58:00.578 bcc Reusing MANIFEST C:\Users\DELL\Desktop\quickcart-team\backend\whatsapp-session\session\Default\Service Worker\Database/MANIFEST-000001

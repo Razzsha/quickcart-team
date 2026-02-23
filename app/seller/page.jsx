@@ -2,6 +2,10 @@
 import React, { useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import { getAdminSession, getUserSession } from "@/lib/session";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const AddProduct = () => {
 
@@ -11,10 +15,45 @@ const AddProduct = () => {
   const [category, setCategory] = useState('Earphone');
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
+    try {
+      const adminSession = getAdminSession();
+      const userSession = getUserSession();
+      const userId = adminSession?.user?._id || userSession?.user?._id;
+      if (!userId) {
+        toast.error('Please log in first');
+        setLoading(false);
+        return;
+      }
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('category', category);
+      formData.append('price', price);
+      formData.append('offerPrice', offerPrice);
+      formData.append('userId', userId);
+      files.forEach((file) => { if (file) formData.append('images', file); });
+      const res = await fetch(`${API_URL}/api/products`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success('Product added successfully!');
+        setName('');
+        setDescription('');
+        setPrice('');
+        setOfferPrice('');
+        setFiles([]);
+      } else {
+        toast.error(data.error || 'Failed to add product');
+      }
+    } catch {
+      toast.error('Failed to add product');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -124,8 +163,8 @@ const AddProduct = () => {
             />
           </div>
         </div>
-        <button type="submit" className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded">
-          ADD
+        <button type="submit" disabled={loading} className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded disabled:opacity-50">
+          {loading ? 'Adding...' : 'ADD'}
         </button>
       </form>
       {/* <Footer /> */}

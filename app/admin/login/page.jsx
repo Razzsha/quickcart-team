@@ -5,6 +5,9 @@ import Image from 'next/image'
 import { assets } from '@/assets/assets'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+import { createSession, setAdminSession } from '@/lib/session'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('')
@@ -16,14 +19,15 @@ const AdminLogin = () => {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/users/admin-login', {
+      const res = await fetch(`${API_URL}/api/users/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
       const data = await res.json()
       if (res.ok) {
-        localStorage.setItem('adminUser', JSON.stringify(data.user))
+        const session = createSession(data.user)
+        setAdminSession(session)
         toast.success('Admin login successful')
         router.push('/admin')
       } else {

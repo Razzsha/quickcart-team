@@ -3,8 +3,13 @@ import React, { useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { useAppContext } from "@/context/AppContext";
+import { getAdminSession } from "@/lib/session";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const AddProduct = () => {
+  const { fetchProductData } = useAppContext();
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
@@ -19,14 +24,43 @@ const AddProduct = () => {
     setLoading(true);
 
     try {
-      // TODO: Implement product creation API
-      toast.success('Product added successfully!');
-      // Reset form
-      setName('');
-      setDescription('');
-      setPrice('');
-      setOfferPrice('');
-      setFiles([]);
+      const session = getAdminSession();
+      const userId = session?.user?._id;
+      if (!userId) {
+        toast.error('Please log in as admin');
+        setLoading(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('category', category);
+      formData.append('price', price);
+      formData.append('offerPrice', offerPrice);
+      formData.append('userId', userId);
+
+      files.forEach((file) => {
+        if (file) formData.append('images', file);
+      });
+
+      const res = await fetch(`${API_URL}/api/products`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success('Product added successfully!');
+        setName('');
+        setDescription('');
+        setPrice('');
+        setOfferPrice('');
+        setFiles([]);
+        fetchProductData?.();
+      } else {
+        toast.error(data.error || 'Failed to add product');
+      }
     } catch (error) {
       toast.error('Failed to add product');
     } finally {

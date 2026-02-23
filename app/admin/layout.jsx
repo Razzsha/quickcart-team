@@ -4,6 +4,7 @@ import Navbar from '@/components/admin/Navbar'
 import Sidebar from '@/components/admin/Sidebar'
 import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { getAdminSession, isSessionValid, clearAdminSession, SESSION_CHECK_INTERVAL_MS } from '@/lib/session'
 
 const Layout = ({ children }) => {
   const router = useRouter()
@@ -17,13 +18,27 @@ const Layout = ({ children }) => {
       setChecked(true)
       return
     }
-    const adminUser = localStorage.getItem('adminUser')
-    if (!adminUser) {
+    const session = getAdminSession()
+    if (!session || !isSessionValid(session)) {
+      if (session) clearAdminSession()
       router.replace('/admin/login')
       return
     }
     setChecked(true)
   }, [pathname, isLoginPage, router])
+
+  // Session expiry check - redirect to login when admin session expires
+  useEffect(() => {
+    if (isLoginPage || !checked) return
+    const interval = setInterval(() => {
+      const session = getAdminSession()
+      if (!session || !isSessionValid(session)) {
+        if (session) clearAdminSession()
+        router.replace('/admin/login')
+      }
+    }, SESSION_CHECK_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [isLoginPage, checked, router])
 
   // Login page - no Navbar/Sidebar
   if (isLoginPage) {

@@ -22,6 +22,7 @@ app.use(express.json());
 const userRoutes = require('./routes/user');
 const orderRoutes = require('./routes/order');
 const contactRoutes = require('./routes/contact');
+const productRoutes = require('./routes/product');
 
 // Initialize WhatsApp (import to trigger initialization)
 require('./web');
@@ -69,6 +70,7 @@ mongoose.connect(MONGO_URI, {
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/products', productRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

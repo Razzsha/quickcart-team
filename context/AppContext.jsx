@@ -1,8 +1,16 @@
 'use client'
-import { productsDummyData } from "@/assets/assets";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  createSession,
+  getUserSession,
+  setUserSession,
+  clearUserSession,
+  isSessionValid,
+  getSessionInfo,
+  SESSION_CHECK_INTERVAL_MS,
+} from "@/lib/session";
 
 export const AppContext = createContext();
 
@@ -20,51 +28,38 @@ export const AppContextProvider = (props) => {
     const [isAdmin, setIsAdmin] = useState(false)
     const [cartItems, setCartItems] = useState({})
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-    // ✅ ADDED
     const [authLoading, setAuthLoading] = useState(true)
+    const [sessionInfo, setSessionInfo] = useState(null) // { loginAt, expiresAt, remainingMs }
 
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
     const fetchProductData = async () => {
-        setProducts(productsDummyData)
+        try {
+            const res = await fetch(`${API_URL}/api/products`)
+            const data = await res.json()
+            setProducts(Array.isArray(data) ? data : [])
+        } catch {
+            setProducts([])
+        }
     }
 
 
-    const fetchUserData = async () => {
-
-        const storedUser = localStorage.getItem('user');
-
-        if (storedUser) {
-
-            try {
-
-                const user = JSON.parse(storedUser);
-
-                setUserData(user);
-
-                setIsAuthenticated(true);
-
-                setIsAdmin(
-                    user.role === 'admin' ||
-                    user.role === 'seller' ||
-                    false
-                );
-
-            }
-
-            catch (error) {
-
-                console.error('Error parsing user data:', error);
-
-                localStorage.removeItem('user');
-
-            }
-
+    const fetchUserData = () => {
+        const session = getUserSession();
+        if (session && isSessionValid(session)) {
+            setUserData(session.user);
+            setIsAuthenticated(true);
+            setIsAdmin(session.user.role === 'admin' || session.user.role === 'seller' || false);
+            setSessionInfo(getSessionInfo(session));
+        } else {
+            if (session) clearUserSession();
+            setUserData(null);
+            setIsAuthenticated(false);
+            setIsAdmin(false);
+            setSessionInfo(null);
         }
-
-        // ✅ ADDED
         setAuthLoading(false);
-
     }
 
 
@@ -74,7 +69,7 @@ export const AppContextProvider = (props) => {
         try {
 
             const response = await fetch(
-                'http://localhost:5000/api/users/signin',
+                `${API_URL}/api/users/signin`,
                 {
                     method: 'POST',
                     headers: {
@@ -87,26 +82,14 @@ export const AppContextProvider = (props) => {
             const data = await response.json();
 
             if (response.ok) {
-
+                const session = createSession(data.user);
+                setUserSession(session);
                 setUserData(data.user);
-
                 setIsAuthenticated(true);
-
-                setIsAdmin(
-                    data.user.role === 'admin' ||
-                    data.user.role === 'seller' ||
-                    false
-                );
-
-                localStorage.setItem(
-                    'user',
-                    JSON.stringify(data.user)
-                );
-
+                setIsAdmin(data.user.role === 'admin' || data.user.role === 'seller' || false);
+                setSessionInfo(getSessionInfo(session));
                 toast.success('Signed in successfully!');
-
                 return { success: true };
-
             }
 
             else {
@@ -132,21 +115,14 @@ export const AppContextProvider = (props) => {
 
 
     const logout = () => {
-
+        clearUserSession();
         setUserData(null);
-
         setIsAuthenticated(false);
-
         setIsAdmin(false);
-
         setCartItems({});
-
-        localStorage.removeItem('user');
-
+        setSessionInfo(null);
         toast.success('Logged out successfully');
-
         router.push('/');
-
     }
 
 
@@ -274,12 +250,29 @@ export const AppContextProvider = (props) => {
 
 
     useEffect(() => {
+        fetchProductData();
+        fetchUserData();
+    }, []);
 
-        fetchProductData()
-
-        fetchUserData()
-
-    }, [])
+    // Session expiry check - auto logout when session expires
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        const interval = setInterval(() => {
+            const session = getUserSession();
+            if (!session || !isSessionValid(session)) {
+                clearUserSession();
+                setUserData(null);
+                setIsAuthenticated(false);
+                setIsAdmin(false);
+                setSessionInfo(null);
+                toast.error('Session expired. Please sign in again.');
+                router.push('/signin');
+            } else {
+                setSessionInfo(getSessionInfo(session));
+            }
+        }, SESSION_CHECK_INTERVAL_MS);
+        return () => clearInterval(interval);
+    }, [isAuthenticated, router])
 
 
 
@@ -328,7 +321,7 @@ export const AppContextProvider = (props) => {
 
         isAdmin, setIsAdmin,
 
-        userData, fetchUserData,
+        userData, fetchUserData, sessionInfo,
 
         products, fetchProductData,
 

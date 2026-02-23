@@ -1,10 +1,12 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { assets, productsDummyData } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const ProductList = () => {
 
@@ -14,8 +16,15 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true)
 
   const fetchSellerProduct = async () => {
-    setProducts(productsDummyData)
-    setLoading(false)
+    try {
+      const res = await fetch(`${API_URL}/api/products`)
+      const data = await res.json()
+      setProducts(Array.isArray(data) ? data : [])
+    } catch {
+      setProducts([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -44,7 +53,7 @@ const ProductList = () => {
                   <td className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate">
                     <div className="bg-gray-500/10 rounded p-2">
                       <Image
-                        src={product.image[0]}
+                        src={product.image?.[0] || 'https://via.placeholder.com/128'}
                         alt="product Image"
                         className="w-16"
                         width={1280}
@@ -57,7 +66,10 @@ const ProductList = () => {
                   </td>
                   <td className="px-4 py-3 max-sm:hidden">{product.category}</td>
                   <td className="px-4 py-3">${product.offerPrice}</td>
-                  <td className="px-4 py-3 max-sm:hidden">
+                  <td className="px-4 py-3 max-sm:hidden flex gap-2">
+                    <button onClick={() => router.push(`/admin/edit-product/${product._id}`)} className="flex items-center gap-1 px-1.5 md:px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+                      Edit
+                    </button>
                     <button onClick={() => router.push(`/product/${product._id}`)} className="flex items-center gap-1 px-1.5 md:px-3.5 py-2 bg-orange-600 text-white rounded-md">
                       <span className="hidden md:block">Visit</span>
                       <Image
