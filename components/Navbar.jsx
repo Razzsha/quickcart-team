@@ -9,6 +9,7 @@ const Navbar = () => {
 
   const { isAdmin, router, isAuthenticated, userData, logout, getCartCount } = useAppContext();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const cartCount = getCartCount();
 
   return (
@@ -32,6 +33,24 @@ const Navbar = () => {
         <Link href="/contact" className="hover:text-gray-900 transition">
           Contact
         </Link>
+        <div className="relative">
+          <div
+            className="cursor-pointer hover:text-gray-900 transition"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            Category
+          </div>
+          {isDropdownOpen && (
+            <div className="absolute top-full left-0 bg-white shadow-md rounded-md py-1 z-10">
+              <Link href="/category/clothes" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>Clothes</Link>
+              <Link href="/category/watch" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>Watch</Link>
+              <Link href="/category/jewellery" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>Jewellery</Link>
+              <Link href="/category/shoe" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>Shoe</Link>
+              <Link href="/category/earbuds" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>Earbuds</Link>
+              <Link href="/category/accessories" className="block px-4 py-2 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>Accessories</Link>
+            </div>
+          )}
+        </div>
 
         <Link href="/admin" className="text-xs border px-4 py-1.5 rounded-full hover:bg-gray-50 transition">Admin</Link>
 
