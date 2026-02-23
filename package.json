@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "install:deps": "node -e \"require('child_process').execSync('npm i', {stdio:'inherit', env:{...process.env, PUPPETEER_SKIP_DOWNLOAD:'1'}})\""
   },
   "dependencies": {
     "body-parser": "^2.2.2",

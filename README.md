@@ -31,6 +31,15 @@ This repo is **frontend only** – contributors can improve the design, add new 
     npm install
     ```
 
+    **Windows:** If install fails due to Puppeteer/Chrome (used by whatsapp-web.js), run either:
+    ```powershell
+    $env:PUPPETEER_SKIP_DOWNLOAD="1"; npm i
+    ```
+    or use the helper script (after Node is available):
+    ```bash
+    npm run install:deps
+    ```
+
 3. Run locally
 
     ```bash
